@@ -25,12 +25,10 @@ from django.views.generic.base import RedirectView
 
 urlpatterns = [
     path('', include('main.urls', namespace='main')),
-    path('admin/', admin.site.urls),
     path('register/', views.register, name='register'),
    # path('', lambda request: redirect('register')),
     path('update_weight/', nutrition_views.update_weight_view, name='update_weight'),
     path('accounts/', include('django.contrib.auth.urls')),
-    path('admin/', admin.site.urls),
     path('', include('nutrition.urls')),
 
     
