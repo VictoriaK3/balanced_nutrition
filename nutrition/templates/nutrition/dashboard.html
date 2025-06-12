@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Dashboard – Здравословно хранене{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Добре дошъл, {{ request.user.first_name }}!</h2>
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title">Оставащи стойности за {{ daily.date }}</h5>
+      <p><strong>Калории:</strong> {{ daily.calorie_deficit|floatformat:0 }} kcal</p>
+      <p><strong>Протеин:</strong> {{ daily.protein_deficit|floatformat:0 }} g</p>
+      <p><strong>Въглехидрати:</strong> {{ daily.carbs_deficit|floatformat:0 }} g</p>
+      <p><strong>Мазнини:</strong> {{ daily.fats_grams|floatformat:0 }} g</p>
+    </div>
+  </div>
+  <h5>Избери хранене:</h5>
+  <div class="btn-group mb-3" role="group">
+    <a href="{% url 'enter_meal' %}?meal_type=breakfast" class="btn btn-outline-primary">Закуска</a>
+    <a href="{% url 'enter_meal' %}?meal_type=lunch"     class="btn btn-outline-primary">Обяд</a>
+    <a href="{% url 'enter_meal' %}?meal_type=snack"     class="btn btn-outline-primary">Снак</a>
+    <a href="{% url 'enter_meal' %}?meal_type=dinner"    class="btn btn-outline-primary">Вечеря</a>
+  </div>
+  {% if daily.total_calories > 0 %}
+    <p>Досега сте изяли <strong>{{ daily.total_calories|floatformat:0 }} kcal</strong> днес.</p>
+  {% endif %}
+</div>
+{% endblock %}

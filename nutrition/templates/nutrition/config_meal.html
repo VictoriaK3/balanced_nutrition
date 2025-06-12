@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Потвърди хранене – HealthyLife{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Потвърди хранене: {{ meal_type|get_display_meal }}</h2>
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="meal_type" value="{{ meal_type }}">
+    {% for item in results %}
+      <input type="hidden" name="food_ids" value="{{ item.food.id }}">
+      <p>
+        {{ item.food.food_name }} – {{ item.grams }} г,
+        Калории: {{ item.kcal }} kcal,
+        Протеин: {{ item.protein }} g,
+        Въглехидрати: {{ item.carbs }} g,
+        Мазнини: {{ item.fats }} g
+      </p>
+    {% endfor %}
+    <button type="submit" name="confirm" value="true" class="btn btn-success">Потвърди</button>
+    <a href="{% url 'enter_meal' %}" class="btn btn-secondary">Назад</a>
+  </form>
+</div>
+{% endblock %}

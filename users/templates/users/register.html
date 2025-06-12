@@ -1,0 +1,13 @@
+<h2>Регистрация</h2>
+
+<form method="post">
+  {% csrf_token %}
+
+  <h3>Данни за вход:</h3>
+  {{ user_form.as_p }}
+
+  <h3>Профилна информация:</h3>
+  {{ profile_form.as_p }}
+
+  <button type="submit">Регистрирай се</button>
+</form>

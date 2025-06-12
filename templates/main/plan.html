@@ -1,0 +1,11 @@
+<!-- templates/main/plan.html -->
+{% extends "base.html" %}
+{% block content %}
+  <h2>План за {{ meal_type.name }}</h2>
+  <ul>
+    {% for item in plan %}
+      <li>{{ item.food.name }}: {{ item.grams }} g</li>
+    {% endfor %}
+  </ul>
+  <a href="{% url 'main:select_meal' %}">Започни нов план</a>
+{% endblock %}

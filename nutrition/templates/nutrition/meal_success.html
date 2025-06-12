@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Успех – HealthyLife{% endblock %}
+{% block content %}
+<div class="container mt-4 text-center">
+  <h2>Храненето беше записано успешно!</h2>
+  <a href="{% url 'enter_meal' %}" class="btn btn-primary mt-3">Добави ново хранене</a>
+  <a href="{% url 'progress' %}" class="btn btn-secondary mt-3">Виж графиката с прогреса</a>
+</div>
+{% endblock %}

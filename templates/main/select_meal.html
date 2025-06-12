@@ -1,0 +1,10 @@
+<!-- templates/main/select_meal.html -->
+{% extends "base.html" %}
+{% block content %}
+
+  <h2>1. Избери хранене</h2>
+  <form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Напред</button>
+  </form>
+{% endblock %}

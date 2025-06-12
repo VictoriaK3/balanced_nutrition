@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>История на храненията</h2>
+  <ul>
+    {% for meal in meals %}
+      <li>
+        {{ meal.date|date:"d.m.Y H:i" }} - {{ meal.meal_type.name }}:
+        <ul>
+          {% for item in meal.mealitem_set.all %}
+            <li>{{ item.food.name }}: {{ item.quantity_g }} g</li>
+          {% endfor %}
+        </ul>
+      </li>
+    {% empty %}
+      <li>Все още няма въведени хранения.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

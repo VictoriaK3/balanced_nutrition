@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Въведи хранене – HealthyLife{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Въведи хранене</h2>
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      <label for="meal_type">Тип хранене:</label>
+      <select name="meal_type" id="meal_type" class="form-control">
+        {% for mt in meal_types %}
+          <option value="{{ mt.name }}">{{ mt.get_name_display }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group mt-3">
+      <label>Избери храни:</label><br>
+      {% for food in foods %}
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="food_ids" value="{{ food.id }}" id="f{{ food.id }}">
+          <label class="form-check-label" for="f{{ food.id }}">{{ food.food_name }}</label>
+        </div>
+      {% endfor %}
+    </div>
+    {% if error %}
+      <div class="alert alert-danger mt-3">{{ error }}</div>
+    {% endif %}
+    <button type="submit" class="btn btn-primary mt-3">Изчисли предложение</button>
+  </form>
+</div>
+{% endblock %}
