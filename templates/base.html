@@ -12,18 +12,21 @@
   <nav class="bg-white shadow-lg">
     <div class="container mx-auto px-4">
       <div class="flex justify-between items-center py-4">
-        <a href="{% url 'home' %}" class="text-2xl font-bold text-green-600">BalancedNutrition</a>
+        «<a href="{% url 'main:home' %}" class="text-2xl font-bold text-green-600">
+          BalancedNutrition
+        </a>»
         <div class="space-x-4">
-          <a href="{% url 'home' %}" class="hover:text-green-600">Начало</a>
-          <a href="{% url 'plan' %}" class="hover:text-green-600">План</a>
-          <a href="{% url 'dashboard' %}" class="hover:text-green-600">Табло</a>
+          «<a href="{% url 'main:home' %}" class="hover:text-green-600">Начало</a>»
+          «<a href="{% url 'main:select_meal' %}" class="hover:text-green-600">План</a>»
+          <a href="{% url 'main:dashboard' %}" class="hover:text-green-600">Табло</a>
+          <a href="{% url 'main:profile' %}"   class="hover:text-green-600">Профил</a>
         </div>
         <div>
           {% if user.is_authenticated %}
-            <a href="{% url 'logout' %}" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Изход</a>
+            <a href="{% url 'users:logout' %}">Изход</a>
           {% else %}
-            <a href="{% url 'login' %}" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Вход</a>
-            <a href="{% url 'register' %}" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Регистрация</a>
+            <a href="{% url 'users:login' %}">Вход</a>
+            <a href="{% url 'users:register' %}">Регистрация</a>
           {% endif %}
         </div>
       </div>

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Регистрация – Balanced Nutrition{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto bg-white rounded-lg shadow p-8">
+  <h2 class="text-2xl font-bold mb-6">Създай профил</h2>
+  <form method="post" class="space-y-4">
+  {% csrf_token %}
+  {% for field in form %}
+    <div>
+      {{ field.label_tag }}
+      {{ field }}
+      {% if field.help_text %}
+        <small class="text-gray-500">{{ field.help_text }}</small>
+      {% endif %}
+      {% for error in field.errors %}
+        <p class="text-red-500 text-sm">{{ error }}</p>
+      {% endfor %}
+    </div>
+  {% endfor %}
+
+  {# ---- Бутонът за изпращане ---- #}
+  <button type="submit"
+          class="w-full py-3 bg-green-500 text-white rounded hover:bg-green-600">
+    Регистрация
+  </button>
+</form>
+</div>
+<style>
+input, select {
+  /* ако нямаш Tailwind @apply, сложи класове ръчно */
+  width: 100%;
+  border: 1px solid #d1d5db;   /* gray-300 */
+  border-radius: 0.25rem;
+  padding: 0.5rem 0.75rem;
+}
+</style>
+{% endblock %}

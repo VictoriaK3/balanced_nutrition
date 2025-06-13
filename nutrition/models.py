@@ -2,13 +2,12 @@ from django.db import models
 from django.contrib.auth.models import User
 from users.models import UserProfile
 from users.models import MealType, Food
-import datetime
-
+from django.utils import timezone
 # Create your models here.
 class DailyDeficit(models.Model):
     user = models.OneToOneField(User, on_delete= models.CASCADE)
-    date            = models.DateField(auto_now_add=True)
-    meal_type       = models.ForeignKey(MealType, on_delete=models.CASCADE)
+    date            = models.DateField(default=timezone.now,unique_for_date="user")
+    #meal_type       = models.ForeignKey(MealType, on_delete=models.CASCADE)
     total_calories  = models.FloatField(default=0, help_text="Общо изядени калории днес")
 
     calorie_deficit = models.FloatField(help_text="Дневен калориен дефицит в kcal")

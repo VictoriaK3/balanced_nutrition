@@ -1,11 +1,41 @@
-<!-- templates/main/plan.html -->
 {% extends "base.html" %}
+{% load humanize %}{% load sum_attribute %}  {# нашият custom filter (т. 7.2) #}
+
 {% block content %}
-  <h2>План за {{ meal_type.name }}</h2>
-  <ul>
+<h2 class="text-2xl font-semibold mb-4">
+    План за {{ meal_type.name|capfirst }}
+</h2>
+
+<table class="table-auto w-full border">
+  <thead class="bg-gray-100">
+    <tr>
+      <th class="p-2 text-left">Храна</th>
+      <th class="p-2 text-right">Грамове</th>
+      <th class="p-2 text-right">Ккал</th>
+    </tr>
+  </thead>
+
+  <tbody>
     {% for item in plan %}
-      <li>{{ item.food.name }}: {{ item.grams }} g</li>
+    <tr class="border-t">
+      <td class="p-2">{{ item.food.name }}</td>
+      <td class="p-2 text-right">{{ item.grams }}</td>
+      <td class="p-2 text-right">{{ item.kcal|intcomma }}</td>
+    </tr>
     {% endfor %}
-  </ul>
-  <a href="{% url 'main:select_meal' %}">Започни нов план</a>
+  </tbody>
+
+  <tfoot class="font-semibold border-t">
+    <tr>
+      <td class="p-2 text-right">Общо:</td>
+      <td class="p-2 text-right">{{ plan|sum_attribute:"grams" }}</td>
+      <td class="p-2 text-right">{{ plan|sum_attribute:"kcal"|intcomma }}</td>
+    </tr>
+  </tfoot>
+</table>
+
+<a href="{% url 'select_meal' %}"
+   class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded mt-4">
+   ← Назад
+</a>
 {% endblock %}

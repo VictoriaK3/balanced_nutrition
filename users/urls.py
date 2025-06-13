@@ -6,7 +6,7 @@ from django.shortcuts import redirect
 
 urlpatterns = [
     path('', lambda request: redirect('register')),  # това е нов ред
-    path('register/', views.register, name='register'),
-    path('register_success/', views.register_success, name='register_success'),
-   # path('update_weight/', update_weight_view, name='update_weight'),
+    path('register/', views.register_view, name='register'),
+    path("login/",    views.login_view,    name="login"),
+    path("logout/",   views.logout_view,   name="logout"),
 ]

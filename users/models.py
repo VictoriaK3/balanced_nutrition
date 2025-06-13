@@ -11,6 +11,14 @@ class UserProfile(models.Model):
         ('high', '6-7 пъти седмично (висока активност)'),
         ('very_active', 'Активна работа'),
     ]
+    ACTIVITY_MULTIPLIER = {      # ← вътрешна константа
+        'none':        1.2,
+        'low':         1.375,
+        'medium':      1.55,
+        'high':        1.725,
+        'very_active': 1.9,
+    }
+
 
     GENDER_CHOICES = [
         ('male', 'Мъж'),
@@ -23,7 +31,7 @@ class UserProfile(models.Model):
     age     = models.PositiveIntegerField()
     height  = models.PositiveIntegerField(help_text="Височина в сантиметри")
     weight  = models.FloatField(help_text="Текущо тегло в кг")
-    wish_weight    = models.FloatField(help_text="Желано тегло в кг")
+    wish_weight    = models.FloatField(help_text="Желано тегло в кг",null=True, blank=True)
     activity_level = models.CharField(max_length=30, choices=ACTIVITY_LEVEL_CHOICES)
     goal_date      = models.DateField(null=True, blank=True, help_text="Дата до която иска да постигне желаното тегло")
     goal = models.CharField(
@@ -37,6 +45,11 @@ class UserProfile(models.Model):
         blank=True
     )
 
+    #property, което връща числото
+    @property
+    def activity_factor(self) -> float:
+        return self.ACTIVITY_MULTIPLIER.get(self.activity_level, 1.2)
+
    # ---- Кеширани дневни таргети ----
     daily_calories   = models.PositiveIntegerField(null=True, blank=True)
     protein_target_g = models.FloatField(null=True, blank=True)
@@ -44,23 +57,14 @@ class UserProfile(models.Model):
     carbs_target_g   = models.FloatField(null=True, blank=True)
     
     def save(self, *args, **kwargs):
-        from nutrition.utils import calc_daily_targets
-        # Извикваме calc_daily_targets с полетата от профила:
-        targets = calc_daily_targets(
-            weight         = self.weight,
-            height         = self.height,
-            age            = self.age,
-            gender         = self.gender,
-            activity_level = self.activity_level,
-            goal           = self.goal
-        )
-        # Поставяме върнатите стойности:
-        self.daily_calories   = targets["kcal"]
-        self.protein_target_g = targets["protein_g"]
-        self.carbs_target_g   = targets["carbs_g"]
-        self.fats_target_g    = targets["fats_g"]
-
+        from nutrition.utils import calculate_daily_deficit
+        kcal, p, c, f = calculate_daily_deficit(self)
+        self.daily_calories   = kcal
+        self.protein_target_g = p
+        self.carbs_target_g   = c
+        self.fats_target_g    = f
         super().save(*args, **kwargs)
+
     def __str__(self):
         return f"Профил на {self.user.username}"
     

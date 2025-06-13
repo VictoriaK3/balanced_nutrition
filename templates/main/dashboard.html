@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% load json_script %}
+{% block title %}Табло – Balanced Nutrition{% endblock %}
+
+{% block content %}
+<h2 class="text-2xl font-bold mb-6">Дневни таргети</h2>
+
+<div class="grid grid-cols-2 gap-4">
+  <div class="bg-white rounded shadow p-6 text-center">
+    <p class="text-gray-500">Калории</p>
+    <p class="text-3xl font-semibold">{{ kcal|intcomma }} <span class="text-lg">kcal</span></p>
+  </div>
+
+  <div class="bg-white rounded shadow p-6 text-center">
+    <p class="text-gray-500">Протеин</p>
+    <p class="text-3xl font-semibold">{{ protein }} <span class="text-lg">g</span></p>
+  </div>
+
+  <div class="bg-white rounded shadow p-6 text-center">
+    <p class="text-gray-500">Въглехидрати</p>
+    <p class="text-3xl font-semibold">{{ carbs }} <span class="text-lg">g</span></p>
+  </div>
+
+  <div class="bg-white rounded shadow p-6 text-center">
+    <p class="text-gray-500">Мазнини</p>
+    <p class="text-3xl font-semibold">{{ fats }} <span class="text-lg">g</span></p>
+  </div>
+</div>
+
+<canvas id="macroChart" class="mt-10 mx-auto"></canvas>
+
+{% comment %} предаваме числата на JS като JSON {% endcomment %}
+{{ protein|json_script:"prot" }}
+{{ carbs|json_script:"carb" }}
+{{ fats|json_script:"fat" }}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const data = [
+  Number(document.getElementById('prot').textContent),
+  Number(document.getElementById('fat').textContent),
+  Number(document.getElementById('carb').textContent),
+];
+
+new Chart(document.getElementById('macroChart'), {
+  type: 'pie',
+  data: {
+    labels: ['Протеин', 'Мазнини', 'Въглехидрати'],
+    datasets: [{ data }]
+  },
+  options: { plugins:{ legend:{position:'bottom'} } }
+});
+</script>
+{% endblock %}

@@ -25,7 +25,7 @@ from django.views.generic.base import RedirectView
 
 urlpatterns = [
     path('', include('main.urls', namespace='main')),
-    path('register/', views.register, name='register'),
+    #path('register/', views.register, name='register'),
    # path('', lambda request: redirect('register')),
     path('update_weight/', nutrition_views.update_weight_view, name='update_weight'),
     path('accounts/', include('django.contrib.auth.urls')),
@@ -35,7 +35,8 @@ urlpatterns = [
     # Пренасочваме коренния URL към избора на хранене
     path('', RedirectView.as_view(pattern_name='main:select_meal', permanent=False), name='home'),
       # Други приложения
-    path('users/',   include('users.urls')),
+    #path('users/',   include('users.urls')),
+    path("", include(("users.urls", "users"), namespace="users")),
     path('accounts/', include('django.contrib.auth.urls')),
     path('nutrition/', include('nutrition.urls')),
 

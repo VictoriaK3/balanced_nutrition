@@ -2,39 +2,40 @@
 from .models import  DailyDeficit, Food
 from .models import ProgressHistory
 from datetime import datetime
+from django.utils import timezone
+from users.models import UserProfile
 
-def calculate_daily_deficit(user_profile, weight=None):
-    # Ако е подадено тегло, ползвай него, иначе от профила
-    w = weight if weight is not None else user_profile.weight
-    if user_profile.gender == 'male':
-        bmr = 10 * w + 6.25 * user_profile.height - 5 * user_profile.age + 5
+def calculate_daily_deficit(profile, weight=None):
+    """Връща kcal, protein_g, carbs_g, fats_g."""
+
+    # 1. Тегло и ръст винаги като float
+    w = float(weight) if weight is not None else float(profile.weight)
+    h = float(profile.height)
+
+    # 2. BMR (Mifflin–St Jeor)
+    if profile.gender == 'male':
+        bmr = 10 * w + 6.25 * h - 5 * profile.age + 5
     else:
-        bmr = 10 * w + 6.25 * user_profile.height - 5 * user_profile.age - 161
+        bmr = 10 * w + 6.25 * h - 5 * profile.age - 161
 
-    activity_multipliers = {
-        'none': 1.2,
-        'low':  1.375,
-        'medium': 1.55,
-        'high':   1.725,
-        'very_active': 1.9,
-    }
+    # 3. TDEE
+    factor = profile.activity_factor        # вече е float
+    maintenance = bmr * factor
 
-    activity_factor = activity_multipliers.get(user_profile.activity_level, 1.2)
-    maintenance_calories = bmr * activity_factor
-
-     # Целево калории в зависимост от целта
-    if user_profile.goal == 'lose_weight':
-       calories = maintenance_calories -500
-    elif user_profile.goal == 'gain_weight':
-        calories = maintenance_calories + 500
+    # 4. Калориен баланс
+    if profile.goal == 'lose_weight':
+        kcal = maintenance - 500
+    elif profile.goal == 'gain_weight':
+        kcal = maintenance + 500
     else:
-        calories = maintenance_calories
+        kcal = maintenance
 
-    protein = w * 2
-    fats    = calories * 0.25 / 9
-    carbs   = (calories -(protein * 4 + fats *9)) / 4
+    # 5. Макроси
+    protein = round(w * 2)
+    fats    = round(kcal * 0.25 / 9)
+    carbs   = round((kcal - (protein * 4 + fats * 9)) / 4)
 
-    return calories, protein, carbs, fats
+    return round(kcal), protein, carbs, fats
 
 
 def get_last_progress_or_dailydeficit(user_profile):
@@ -124,58 +125,55 @@ def update_user_weight(user_profile, new_weight):
 """ функции за изчисление на грамове за едно ядене
 """
 #разпределяне на макронутриентите по хранения
-def get_meal_distribution():
-    # Пропорции: закуска 20%, обяд 35%, следобедна 15%, вечеря 30%
-    return {
-        'breakfast': 0.20,
-        'lunch':     0.35,
-        'snack':     0.15,
-        'dinner':    0.30,
-    }
-    
+MEAL_SHARE = {
+    "breakfast": 0.20,  # 20 %
+    "lunch":     0.35,  # 35 %
+    "snack":     0.15,  # 15 %
+    "dinner":    0.30,  # 30 %
+}
 #Функция за изчисление на количествата за избрани храни
-def calculate_meal_quantities(user, meal_type_name, selected_food_ids):
-     # Вземи последния дефицит за потребителя
-    daily_deficit = DailyDeficit.objects.filter(user=user).latest('date')
-    total_kcal = daily_deficit.calories
-    total_protein = daily_deficit.protein
-    total_carbs = daily_deficit.carbs
-    total_fats = daily_deficit.fats
+def calculate_meal_quantities(user, meal_code, food_ids):
+    """
+    • user        – request.user
+    • meal_code   – 'breakfast' | 'lunch' | 'snack' | 'dinner'
+    • food_ids    – list/iterable от избраните Food PK-та
 
-    # Разпредели според типа хранене
-    distribution = get_meal_distribution()
-    kcal_goal = total_kcal * distribution[meal_type_name]
-    protein_goal = total_protein * distribution[meal_type_name]
-    carbs_goal = total_carbs * distribution[meal_type_name]
-    fats_goal = total_fats * distribution[meal_type_name]
+    Връща list от dict-ове:
+        [{'food': Food, 'grams': 123, 'kcal': 321}, …]
+    """
+    # 2.2  Взимаме последния DailyDeficit → дневни kcal & макроси
+    daily = (user.daily_deficits
+                  .filter(date__lte=timezone.now().date())
+                  .first())        # последният (благодарение на Meta.ordering)
 
-     # Вземи избраните храни
-    foods = Food.objects.filter(id__in=selected_food_ids)
+    if not daily:
+        # Ако профилът е нов и още няма дефицит – по-добре гръмни,
+        # за да се сетим да създадем/обновим профила
+        raise ValueError("No DailyDeficit found – създай/обнови профила първо!")
 
-    # Сумирай енергията на всички храни (на 100 г)
-    total_energy = sum(food.energy_kcal for food in foods)
+    # 2.3  Колко kcal трябва да покрием с това хранене
+    target_cal = daily.calorie_deficit * MEAL_SHARE[meal_code]
 
-    results = []
-    for food in foods:
-        ratio = food.energy_kcal / total_energy if total_energy else 0
-        kcal_share = kcal_goal * ratio
+    # 2.4  Зареждаме обектите Food
+    foods = list(Food.objects.filter(id__in=food_ids))
 
-        # Колко грама от храната са нужни за тази част от калориите
-        if food.energy_kcal > 0:
-            grams = kcal_share * 100 / food.energy_kcal
-        else:
-            grams = 0
+    # 2.5  Изчисляваме „kcal за 1 g“ за всяка храна
+    kcal_per_g = [f.calories / 100 for f in foods]   # защото calories са „на 100 g“
 
-        results.append({
-            'food': food,
-            'grams': round(grams, 1),
-            'kcal': round(food.energy_kcal * grams / 100, 1),
-            'protein': round(food.protein_g * grams / 100, 1) if food.protein_g else 0,
-            'carbs': round(food.carbs_g * grams / 100, 1) if food.carbs_g else 0,
-            'fats': round(food.fat_g * grams / 100, 1) if food.fat_g else 0,
+    # 2.6  Сборът на всички калории-на-грам → ще ни трябва за пропорцията
+    total_kcal_per_g = sum(kcal_per_g)
+
+    plan = []
+    for food, kpg in zip(foods, kcal_per_g):
+        share = kpg / total_kcal_per_g          # колко % от общите kcal „носи“ тази храна
+        grams = round(target_cal * share / kpg) # => грамовете ѝ
+        plan.append({
+            "food":  food,
+            "grams": grams,
+            "kcal":  grams * kpg,               # реалните kcal (≈ share * target_cal)
         })
 
-    return results
+    return plan
 
 #calc_daily_targets, която приема числови стойности (вместо user_profile) и вътре конструираме „временен профил“ _TempProfile, 
 # за да може да извикаме съществуващата calculate_daily_deficit.

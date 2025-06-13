@@ -4,21 +4,9 @@
 <div class="bg-white rounded-lg shadow p-8 text-center">
   <h1 class="text-4xl font-bold mb-4">Добре дошли в Balanced Nutrition!</h1>
   <p class="text-lg mb-6">Вашият път към здравословен начин на живот започва тук.</p>
-  <a href="{% url 'register' %}" class="px-6 py-3 bg-green-500 text-white rounded hover:bg-green-600 mr-4">Регистрация</a>
-  <a href="{% url 'login' %}" class="px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600">Вход</a>
+  <a href="{% url 'users:register' %}" class="px-6 py-3 bg-green-500 text-white rounded hover:bg-green-600 mr-4">Регистрация</a>
+  <a href="{% url 'users:login' %}" class="px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600">Вход</a>
 </div>
 {% endblock %}
 
-<!-- templates/main/register.html -->
-{% extends 'base.html' %}
-{% block title %}Регистрация - Balanced Nutrition{% endblock %}
-{% block content %}
-<div class="max-w-md mx-auto bg-white rounded-lg shadow p-8">
-  <h2 class="text-2xl font-bold mb-6">Създай профил</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="w-full py-3 bg-green-500 text-white rounded hover:bg-green-600 mt-4">Регистрация</button>
-  </form>
-</div>
-{% endblock %}
+
