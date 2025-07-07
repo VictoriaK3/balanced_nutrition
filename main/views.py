@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from .forms import MealSelectionForm, FoodSelectionForm
 from users.models import UserProfile
 from nutrition.models import Meal, MealItem
+import json
 
 
 def home(request):
@@ -264,6 +265,10 @@ def select_foods(request):
 def dashboard(request):
     profile = get_object_or_404(UserProfile, user=request.user)
 
+    macro = [profile.protein_target_g,
+             profile.fats_target_g,
+             profile.carbs_target_g]
+
     context = {
         "cards": [
             {"label": "Калории",      "val": profile.daily_calories,   "unit": "kcal"},
@@ -271,10 +276,7 @@ def dashboard(request):
             {"label": "Въглехидрати", "val": profile.carbs_target_g,   "unit": "g"},
             {"label": "Мазнини",      "val": profile.fats_target_g,    "unit": "g"},
         ],
-        # за пай-диаграмата
-        "macro": [profile.protein_target_g,
-                  profile.fats_target_g,
-                  profile.carbs_target_g],
+        "macro_json": json.dumps(macro),   # ← сериализиран списък
     }
     return render(request, "main/dashboard.html", context)
 
