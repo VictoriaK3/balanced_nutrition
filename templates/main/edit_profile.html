@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Редакция на профил{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 600px; margin: 40px auto;">
+  <div class="glass-card">
+    <h2 class="title" style="text-align: center;">Редактирай профила</h2>
+
+    <form method="post" style="display: flex; flex-direction: column; gap: 20px;">
+      {% csrf_token %}
+   
+      <div>
+        <label for="{{ form.weight.id_for_label }}" class="label">Текущо тегло</label><br>
+        {{ form.weight }}
+      </div>
+
+      <div>
+        <label for="{{ form.wish_weight.id_for_label }}" class="label">Желано тегло</label><br>
+        {{ form.wish_weight }}
+      </div>
+      
+      <div class="form-group">
+          <label for="id_height">Ръст (в см):</label>
+          {{ form.height }}
+      </div>
+
+      <div>
+        <label for="{{ form.goal_date.id_for_label }}" class="label">Целева дата</label><br>
+        {{ form.goal_date }}
+      </div>
+
+      <div>
+        <label for="{{ form.city.id_for_label }}" class="label">Град</label><br>
+        {{ form.city }}
+      </div>
+
+      <button type="submit" class="btn-glass" style="width: 100%;">Запази</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

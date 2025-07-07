@@ -8,11 +8,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         csv_files = [
-            'data/FOOD-DATA-GROUP1.csv',
-            'data/FOOD-DATA-GROUP2-BG.csv',
-            'data/FOOD-DATA-GROUP3-BG.csv',
-            'data/FOOD-DATA-GROUP4-BG.csv',
-            'data/FOOD-DATA-GROUP5-BG.csv',
+            'data/foods.csv',
         ]
 
         def to_float(val):
@@ -38,10 +34,13 @@ class Command(BaseCommand):
                     obj, created = Food.objects.update_or_create(
                         food_name=food_name.strip(),
                         defaults={
-                            'energy_kcal': to_float(row.get('Caloric Value')),
-                            'protein_g': to_float(row.get('Protein')),
-                            'fat_g': to_float(row.get('Fat')),
-                            'carbs_g': to_float(row.get('Carbohydrates')),
+                            'energy_kcal': to_float(row.get('energy_kcal')),
+                            'protein_g': to_float(row.get('protein_g')),
+                            'fat_g': to_float(row.get('fat_g')),
+                            'carbs_g': to_float(row.get('carbs_g')),
+                            'category': row.get('category', '').strip(),
+                            'vitamins_total': to_float(row.get('vitamins_total', '')),
+                            
                         }
                     )
 

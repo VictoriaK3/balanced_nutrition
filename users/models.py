@@ -44,44 +44,61 @@ class UserProfile(models.Model):
         null=True,
         blank=True
     )
-
+    city = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Град за климатична корекция"
+    )
     #property, което връща числото
     @property
     def activity_factor(self) -> float:
         return self.ACTIVITY_MULTIPLIER.get(self.activity_level, 1.2)
 
-   # ---- Кеширани дневни таргети ----
-    daily_calories   = models.PositiveIntegerField(null=True, blank=True)
-    protein_target_g = models.FloatField(null=True, blank=True)
-    fats_target_g    = models.FloatField(null=True, blank=True)
-    carbs_target_g   = models.FloatField(null=True, blank=True)
     
     def save(self, *args, **kwargs):
-        from nutrition.utils import calculate_daily_deficit
-        kcal, p, c, f = calculate_daily_deficit(self)
-        self.daily_calories   = kcal
-        self.protein_target_g = p
-        self.carbs_target_g   = c
-        self.fats_target_g    = f
-        super().save(*args, **kwargs)
+     super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Профил на {self.user.username}"
     
 class WeightLog(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='weight_logs')
-    weigth       = models.FloatField(help_text='Тегло в кг')
+    old_weight      = models.FloatField(help_text='Старо тегло в кг', null=True, blank=True)
+    new_weight      = models.FloatField(help_text='Ново тегло в кг',  null=True, blank=True)
+    old_wish_weight = models.FloatField(help_text='Стара целево тегло в кг', null=True, blank=True)
+    new_wish_weight = models.FloatField(help_text='Ново целево тегло в кг',  null=True, blank=True)
     data_recorded= models.DateField(auto_now_add=True)
+    
+    @property
+    def weight_delta(self):
+        if self.old_weight is not None and self.new_weight is not None:
+            return self.new_weight - self.old_weight
+        return None
 
+    @property
+    def wish_weight_delta(self):
+        if self.old_wish_weight is not None and self.new_wish_weight is not None:
+            return self.new_wish_weight - self.old_wish_weight
+        return None
+    
+    class Meta:
+        ordering = ["-data_recorded"]
     def __str__(self):
-        return f"{self.user_profile.user.username} - {self.weigth} кг на {self.data_recorded}"
+        return  (
+            f"{self.user_profile.user.username}: "
+            f"{self.old_weight}→{self.new_weight} kg, "
+            f"{self.old_wish_weight}→{self.new_wish_weight} wish @ {self.date_recorded:%Y-%m-%d}"
+        )
     
 class Food(models.Model):
-    food_name = models.CharField(max_length= 255, unique=True)
-    energy_kcal = models.FloatField(null=True, blank=True)
-    protein_g   = models.FloatField(null=True, blank=True)
-    fat_g       = models.FloatField(null=True, blank=True)
-    carbs_g     = models.FloatField(null=True, blank=True)
+    food_name      = models.CharField(max_length= 255, unique=True)
+    energy_kcal    = models.FloatField(null=True, blank=True)
+    protein_g      = models.FloatField(null=True, blank=True)
+    fat_g          = models.FloatField(null=True, blank=True)
+    carbs_g        = models.FloatField(null=True, blank=True)
+    vitamins_total = models.FloatField(null=True, blank=True)
+    category       = models.CharField(max_length= 100, default='друго')
+
 
     def __str__(self):
         return self.food_name

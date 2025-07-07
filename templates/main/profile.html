@@ -1,22 +1,47 @@
 {% extends "base.html" %}
-{% block title %}Профил – Balanced Nutrition{% endblock %}
-{% block content %}
-<h2 class="text-2xl font-bold mb-6">Профил</h2>
+{% load humanize %}
 
-<table class="table-auto bg-white rounded shadow w-full">
-  <tbody>
-    <tr><th class="p-3 text-left">Потребителско име</th><td class="p-3">{{ request.user.username }}</td></tr>
-    <tr><th class="p-3 text-left">Имейл</th><td class="p-3">{{ request.user.email }}</td></tr>
-    <tr><th class="p-3 text-left">Име</th><td class="p-3">{{ request.user.first_name }}</td></tr>
-    <tr><th class="p-3 text-left">Фамилия</th><td class="p-3">{{ request.user.last_name }}</td></tr>
-    <tr><th class="p-3 text-left">Пол</th><td class="p-3">{{ profile.get_gender_display }}</td></tr>
-    <tr><th class="p-3 text-left">Възраст</th><td class="p-3">{{ profile.age }}</td></tr>
-    <tr><th class="p-3 text-left">Ръст</th><td class="p-3">{{ profile.height }} cm</td></tr>
-    <tr><th class="p-3 text-left">Тегло</th><td class="p-3">{{ profile.weight }} kg</td></tr>
-    <tr><th class="p-3 text-left">Желано тегло</th><td class="p-3">{{ profile.wish_weight }} kg</td></tr>
-    <tr><th class="p-3 text-left">Активност</th><td class="p-3">{{ profile.get_activity_level_display }}</td></tr>
-    <tr><th class="p-3 text-left">Цел</th><td class="p-3">{{ profile.get_goal_display }}</td></tr>
-    <tr><th class="p-3 text-left">Дневни калории</th><td class="p-3">{{ profile.daily_calories|intcomma }} kcal</td></tr>
-  </tbody>
-</table>
+{% block title %}Профил – NutriPal{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <div class="glass-card profile-box">
+    <h2 class="title">Моят профил</h2>
+
+    <div class="profile-content">
+      <table class="profile-table">
+        <tbody>
+          <tr><th>Потребителско име</th><td>{{ request.user.username }}</td></tr>
+          <tr><th>Имейл</th><td>{{ request.user.email }}</td></tr>
+          <tr><th>Име</th><td>{{ request.user.first_name }}</td></tr>
+          <tr><th>Фамилия</th><td>{{ request.user.last_name }}</td></tr>
+          <tr><th>Пол</th><td>{{ profile.get_gender_display }}</td></tr>
+          <tr><th>Възраст</th><td>{{ profile.age }}</td></tr>
+          <tr><th>Ръст</th><td>{{ profile.height }} cm</td></tr>
+          <tr><th>Тегло</th><td>{{ profile.weight }} kg</td></tr>
+          <tr><th>Желано тегло</th><td>{{ profile.wish_weight }} kg</td></tr>
+          <tr><th>Активност</th><td>{{ profile.get_activity_level_display }}</td></tr>
+          <tr><th>Цел</th><td>{{ profile.get_goal_display|default:"—" }}</td></tr>
+          <tr><th>Дневни калории</th><td>{{ deficit.calorie_deficit|intcomma }} kcal</td></tr>
+          <tr><th>Град</th><td>{{ profile.city|intcomma }} </td></tr>
+          <tr><th>Препоръчителна вода</th>
+    <td>
+      {% if daily_water %}
+        {{ daily_water|floatformat:2 }} литра
+        
+      {% endif %}
+    </td>
+</tr>
+
+        </tbody>
+      </table>
+
+      <div class="btn-area">
+        <a href="{% url 'users:edit_profile' %}" class="btn">✏️ Редактирай профил</a>
+      </div>
+    </div>
+  </div>
+
+</div>
 {% endblock %}

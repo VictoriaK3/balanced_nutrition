@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'users',
     'nutrition',
     'main',
+    'diet_ai',
 ]
 
 MIDDLEWARE = [
@@ -55,6 +56,13 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'nutrition_project.urls'
+
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "static"
+]
+
+LOGOUT_REDIRECT_URL = 'main:public_home'
 
 TEMPLATES = [
     {
@@ -129,3 +137,17 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = 'viktoriakehaiova5@gmail.com'
+EMAIL_HOST_PASSWORD = 'zjxorpdrzbsugweg'  
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+from django.urls import reverse_lazy
+LOGIN_REDIRECT_URL = reverse_lazy('home')
+

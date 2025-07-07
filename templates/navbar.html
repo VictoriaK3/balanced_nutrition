@@ -1,36 +1,41 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <!-- Лого води към избор на хранене -->
-  <a class="navbar-brand" href="{% url 'main:select_meal' %}">Balanced Nutrition</a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse"
-          data-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent"
-          aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/navbar.css' %}">
 
-  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-    <ul class="navbar-nav mr-auto">
-      <!-- Въведи хранене -->
-      <li class="nav-item {% if request.resolver_match.url_name == 'select_meal' %}active{% endif %}">
-        <a class="nav-link" href="{% url 'main:select_meal' %}">Въведи хранене</a>
-      </li>
+<nav class="navbar">
+  <div class="navbar-container">
+    <a href="/" class="navbar-logo">NutriPal</a>
 
-      <!-- История на храненията -->
-      <li class="nav-item {% if request.resolver_match.url_name == 'meal_history' %}active{% endif %}">
-        <a class="nav-link" href="{% url 'main:meal_history' %}">История (хранене)</a>
-      </li>
-    </ul>
+    <!-- Hamburger бутон -->
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
 
-    <ul class="navbar-nav ml-auto">
+    <!-- Централно меню -->
+    <div class="nav-center" id="nav-menu">
+      <a href="{% url 'main:home' %}">Начало</a>
+      <a href="{% url 'main:select_meal' %}">Калкулатор за храни</a>
+      <a href="{% url 'main:dashboard' %}">Табло</a>
+      <a href="{% url 'predict_diet' %}">Предсказване</a>
+      <a href="{% url 'main:progress_graph' %}">Прогрес</a>
+      <a href="{% url 'main:profile' %}">Профил</a>
+    </div>
+
+    <!-- Десен бутон за вход/изход -->
+    <div class="nav-right">
       {% if user.is_authenticated %}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'logout' %}">Излез ({{ user.username }})</a>
-        </li>
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="logout-btn">Изход</button>
+        </form>
       {% else %}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'login' %}">Влез</a>
-        </li>
+        <a href="{% url 'login' %}" class="login-link">Вход</a>
       {% endif %}
-    </ul>
+    </div>
   </div>
 </nav>
+
+<!-- Скрипт за отваряне/затваряне на мобилно меню -->
+<script>
+  function toggleMenu() {
+    const menu = document.getElementById('nav-menu');
+    menu.classList.toggle('show-menu');
+  }
+</script>

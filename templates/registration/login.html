@@ -1,20 +1,40 @@
 {% extends "base.html" %}
-{% block title %}Вход – Balanced Nutrition{% endblock %}
+{% block title %}Вход – NutriPal{% endblock %}
 
 {% block content %}
-<div class="max-w-md mx-auto bg-white rounded-lg shadow p-8">
-  <h2 class="text-2xl font-bold mb-6">Вход</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit"
-            class="w-full py-3 bg-blue-500 text-white rounded hover:bg-blue-600 mt-4">
-      Вход
-    </button>
-  </form>
-  <p class="mt-4 text-center text-sm">
-    Нямаш акаунт?
-    <a href="{% url 'users:register' %}" class="text-green-600 hover:underline">Регистрирай се</a>
-  </p>
+<div class="container" style="max-width: 500px; margin: 60px auto;">
+  <div class="glass-card">
+
+    <h2 class="title" style="text-align: center;">Вход</h2>
+
+    {% if form.non_field_errors %}
+      <div style="color: #e53935; background-color: #ffe6e6; padding: 12px; border-radius: 8px; margin-bottom: 10px; text-align: center;">
+        {% for error in form.non_field_errors %}
+          <p>{{ error }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="post" style="display: flex; flex-direction: column; gap: 20px;">
+      {% csrf_token %}
+      
+      <div>
+        <label for="{{ form.username.id_for_label }}" class="label">Потребител</label>
+        {{ form.username }}
+      </div>
+
+      <div>
+        <label for="{{ form.password.id_for_label }}" class="label">Парола</label>
+        {{ form.password }}
+      </div>
+
+      <button type="submit" class="btn-glass" style="width: 100%;">Вход</button>
+    </form>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 0.9rem;">
+      Нямаш акаунт? <a href="{% url 'users:register' %}" style="color: #00c853; text-decoration: underline;">Регистрирай се</a>
+    </p>
+
+  </div>
 </div>
 {% endblock %}

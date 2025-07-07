@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Начало{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <!-- Калориен баланс -->
+  <div class=" glass-card text-center">
+    <h2 class="title">Калории</h2>
+    <div class="card-row" style="justify-content: space-around;">
+      <div>
+        <div class="label">Цел</div>
+        <div class="value green">{{ kcal_card.goal|floatformat:0 }} kcal</div>
+      </div>
+      <div>
+        <div class="label">Консумирано</div>
+        <div class="value orange">{{ kcal_card.cons|floatformat:0 }} kcal</div>
+      </div>
+      <div>
+        <div class="label">Остава</div>
+        <div class="value blue">{{ kcal_card.rem|floatformat:0 }} kcal</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Макроси -->
+  <div class="glass-card">
+    <h2 class="title">Макроси</h2>
+    <div class="card-row" style="justify-content: space-between;">
+      {% for m in macros %}
+        <div>
+          <div class="label">{{ m.label }}</div>
+          <div class="value">{{ m.cons|floatformat:1 }} / {{ m.goal|floatformat:1 }} g</div>
+          <div class="label green">Остава: {{ m.rem|floatformat:1 }} g</div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Хранения -->
+  <div class=" glass-card">
+    <h2 class="title">Хранения</h2>
+    <div class="button-grid">
+      {% for btn in meal_links %}
+        <a href="{% url 'main:select_foods_by_type' btn.id %}" class="btn">{{ btn.label }}</a>
+      {% endfor %}
+    </div>
+  </div>
+  
+<!-- Хидратация -->
+<div class=" glass-card text-center">
+  <h2 class="title">Хидратация</h2>
+
+  <div class="card-row" style="justify-content: center; gap: 40px;">
+    <div>
+      <div class="label">Препоръчителна вода</div>
+      <div class="value green">{{ water_goal|floatformat:0 }} ml</div>
+    </div>
+    <div>
+      <div class="label">Изпито днес</div>
+      <div class="value blue">{{ water_log.amount_ml|default:0 }} ml</div>
+    </div>
+  </div>
+
+  <form method="post" class="mt-4">
+  {% csrf_token %}
+  <label for="add_water_amount">Избери количество:</label>
+  <select name="add_water_amount" id="add_water_amount" class="form-input" style="margin-left: 10px;">
+    <option value="100">100 ml</option>
+    <option value="200">200 ml</option>
+    <option value="300">300 ml</option>
+    <option value="400">400 ml</option>
+    <option value="500">500 ml</option>
+  </select>
+  <button type="submit" class="btn-glass" style="margin-left: 10px;"> Добави</button>
+</form>
+
+</div>
+
+</div>
+{% endblock %}

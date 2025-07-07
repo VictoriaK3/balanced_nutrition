@@ -2,27 +2,22 @@
 from django import forms
 from users.models import MealType
 from users.models import Food
+from dal import autocomplete
 
 class MealSelectionForm(forms.Form):
-    """
-    Форма за избор на тип хранене (закуска, обяд, вечеря)
-    Използва модел MealType от приложението users.
-    """
+   
     meal_type = forms.ModelChoiceField(
         queryset=MealType.objects.all(),
-        label='Избери хранене',
-        widget=forms.RadioSelect
+        widget=forms.RadioSelect,
+        empty_label=None,
+        label="Изберете тип хранене"
     )
 
 class FoodSelectionForm(forms.Form):
-    """
-    Форма за избор на хранителни продукти
-    Използва модел Food от приложението users.
-    """
     foods = forms.ModelMultipleChoiceField(
         queryset=Food.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
-        label='Избери храни'
+        widget=forms.CheckboxSelectMultiple(),
+        label="Изберете храни"
     )
 
 from django import forms
@@ -46,3 +41,12 @@ class RegistrationForm(forms.ModelForm):
 class LoginForm(AuthenticationForm):
     username = forms.CharField(label="Потребител")
     password = forms.CharField(widget=forms.PasswordInput, label="Парола")
+
+
+class MealSelectionForm(forms.Form):
+    meal_type = forms.ModelChoiceField(
+        queryset=MealType.objects.all(),
+        widget=forms.RadioSelect,
+        empty_label=None,
+        label="Изберете тип хранене"
+    )

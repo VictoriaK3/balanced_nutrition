@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="glass-card" style="max-width: 600px; margin: 40px auto;">
+  <h2 style="text-align:center;">Предсказване на подходящ режим</h2>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn-glass">Предсказване</button>
+  </form>
+
+  {% if prediction %}
+    <div class="glass-card" style="margin-top: 20px;">
+      <h3>Препоръчаният режим е:</h3>
+      <p><strong>{{ prediction }}</strong></p>
+
+      {% if calorie_result %}
+        <hr>
+        <h4>Предсказан калориен дефицит и макроси:</h4>
+        <ul>
+          <li>Дефицит: {{ calorie_result.calories_deficit }} kcal</li>
+          <li>Протеини: {{ calorie_result.protein }} g</li>
+          <li>Мазнини: {{ calorie_result.fat }} g</li>
+          <li>Въглехидрати: {{ calorie_result.carbs }} g</li>
+        </ul>
+      {% endif %}
+
+      {% if prediction_id %}
+        <form method="post" action="{% url 'feedback' prediction_id %}">
+          {% csrf_token %}
+          <button name="feedback" value="positive" class="btn-glass">Доволен съм</button>
+          <button name="feedback" value="negative" class="btn-glass" style="background-color: #ff8a80;">Не съм доволен</button>
+        </form>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

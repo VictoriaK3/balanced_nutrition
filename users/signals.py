@@ -1,4 +1,3 @@
-#регистрация на всички сигнали 
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 from django.dispatch import receiver
@@ -6,13 +5,11 @@ from .models import UserProfile,DailyDeficit
 from nutrition.utils import calculate_daily_deficit
 from django.utils import timezone
 
+
+
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.create(user=instance)
-
-
-#def save_user_profile(sender, instance, **kwargs):
- #  instance.UserProfile.save() 
 
 def save_user_profile(sender, instance, **kwargs):
     instance.userprofile.save()
@@ -28,8 +25,8 @@ def keep_daily_deficit(sender, instance, **kwargs):
 
     # 2) Един ред на ден → update_or_create
     DailyDeficit.objects.update_or_create(
-        user=instance.user,               # сочим към auth.User!
-        date=timezone.now().date(),       # ключ: (user, date)
+        user=instance.user,               
+        date=timezone.now().date(),       
         defaults={
             "calorie_deficit": calories,
             "protein_deficit": protein,

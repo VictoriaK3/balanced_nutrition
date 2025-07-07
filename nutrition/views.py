@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.utils import timezone
 
 from users.models import Food, MealType
-from .models import DailyDeficit, Meal, MealItem, ProgressHistory
+from .models import DailyDeficit, Meal, MealItem
 from .utils import update_user_weight, calculate_daily_deficit, calculate_meal_quantities
 from users.models import UserProfile, WeightLog
 import json
@@ -56,14 +56,14 @@ def enter_meal(request):
             meal_type = get_object_or_404(MealType, name=meal_type_name)
             total_kcal = sum(item['kcal'] for item in results)
 
-            # 1) Създаваме Meal
+            
             meal = Meal.objects.create(
                 user=user,
                 meal_type=meal_type,
                 total_calories=total_kcal,
             )
 
-            # 2) Създаваме MealItem
+            
             for item in results:
                 MealItem.objects.create(
                     meal=meal,
@@ -71,7 +71,7 @@ def enter_meal(request):
                     weight_in_grams=item['grams']
                 )
 
-            # 3) Гарантираме, че имаме DailyDeficit за днес
+           
             today = timezone.localdate()
             daily_deficit, created = DailyDeficit.objects.get_or_create(
                 user=user,
@@ -89,14 +89,14 @@ def enter_meal(request):
             if not created:
                 daily_deficit.meal_type = meal_type
 
-            # 4) Актуализираме стойностите
+            
             daily_deficit.calorie_deficit -= total_kcal
             daily_deficit.protein_deficit -= sum(i['protein'] for i in results)
             daily_deficit.carbs_deficit   -= sum(i['carbs'] for i in results)
             daily_deficit.fats_grams      -= sum(i['fats'] for i in results)
             daily_deficit.total_calories  += total_kcal
 
-            # Не допускаме отрицателни стойности
+            # без отрицателни стойности
             if daily_deficit.calorie_deficit < 0:
                 daily_deficit.calorie_deficit = 0
             if daily_deficit.protein_deficit < 0:
@@ -110,13 +110,13 @@ def enter_meal(request):
             messages.success(request, f"Храненето ({meal_type.get_name_display()}) беше записано.")
             return redirect('meal_success')
 
-        # 5) Рендериране на страницата за потвърждение с предложения грамове
+        
         return render(request, 'nutrition/confirm_meal.html', {
             'results': results,
             'meal_type': meal_type_name,
         })
 
-    # GET: просто показваме формата
+    
     return render(request, 'nutrition/enter_meal.html', {
         'foods': Food.objects.all(),
         'meal_types': MealType.objects.all(),
@@ -144,7 +144,6 @@ def meal_detail(request, meal_id):
 def delete_meal(request, meal_id):
     meal = get_object_or_404(Meal, id=meal_id, user=request.user)
     if request.method == 'POST':
-        # (по избор) Връщане на калории обратно в DailyDeficit, ако желаете
         daily = DailyDeficit.objects.filter(user=request.user, date=meal.date).first()
         if daily:
             total_kcal = meal.total_calories
@@ -159,27 +158,27 @@ def delete_meal(request, meal_id):
 
 @login_required
 def progress_view(request):
-    user_profile = request.user.userprofile
-    entries = ProgressHistory.objects.filter(user_profile=user_profile)
+    user = request.user
+    entries = DailyDeficit.objects.filter(user=user).order_by('date')
 
-    dates = [e.date_recorded.strftime('%Y-%m-%d') for e in entries]
-    weights = [e.weight for e in entries]
-    calories = [e.calories for e in entries]
-    protein = [e.protein for e in entries]
-    carbs = [e.carbs for e in entries]
-    fats = [e.fats for e in entries]
+    dates = [e.date.strftime('%Y-%m-%d') for e in entries]
+    calorie_deficits = [e.calorie_deficit for e in entries]
+    protein = [e.protein_deficit for e in entries]
+    carbs = [e.carbs_deficit for e in entries]
+    fats = [e.fats_grams for e in entries]
+    water = [e.daily_water_goal for e in entries]
 
     context = {
         'dates': dates,
-        'weights': weights,
-        'calories': calories,
+        'calories': calorie_deficits,
         'protein': protein,
         'carbs': carbs,
         'fats': fats,
+        'water': water,
     }
     return render(request, 'nutrition/progress.html', context)
 
-
+ 
 @login_required
 def weight_history(request):
     user_profile = request.user.userprofile

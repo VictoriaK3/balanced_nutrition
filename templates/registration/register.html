@@ -1,37 +1,38 @@
 {% extends "base.html" %}
-{% block title %}Регистрация – Balanced Nutrition{% endblock %}
-{% block content %}
-<div class="max-w-md mx-auto bg-white rounded-lg shadow p-8">
-  <h2 class="text-2xl font-bold mb-6">Създай профил</h2>
-  <form method="post" class="space-y-4">
-  {% csrf_token %}
-  {% for field in form %}
-    <div>
-      {{ field.label_tag }}
-      {{ field }}
-      {% if field.help_text %}
-        <small class="text-gray-500">{{ field.help_text }}</small>
-      {% endif %}
-      {% for error in field.errors %}
-        <p class="text-red-500 text-sm">{{ error }}</p>
-      {% endfor %}
-    </div>
-  {% endfor %}
+{% block title %}Регистрация – NutriPal{% endblock %}
 
-  {# ---- Бутонът за изпращане ---- #}
-  <button type="submit"
-          class="w-full py-3 bg-green-500 text-white rounded hover:bg-green-600">
-    Регистрация
-  </button>
-</form>
+{% block content %}
+<div class="container" style="max-width: 600px; margin: 60px auto;">
+  <div class="glass-card">
+
+    <h2 class="title" style="text-align: center;">Създай профил</h2>
+
+    <form method="post" style="display: flex; flex-direction: column; gap: 20px;">
+      {% csrf_token %}
+      
+      {% for field in form %}
+        <div>
+          <label for="{{ field.id_for_label }}" class="label">{{ field.label }}</label>
+          {{ field }}
+
+          {% if field.help_text %}
+            <small style="color: #666; font-size: 0.85rem;">{{ field.help_text }}</small>
+          {% endif %}
+
+          {% for error in field.errors %}
+            <p style="color: #e53935; font-size: 0.85rem; margin-top: 4px;">{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endfor %}
+
+      <button type="submit" class="btn-glass" style="width: 100%;">Регистрация</button>
+    </form>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 0.9rem;">
+      Вече имаш акаунт?
+      <a href="{% url 'login' %}" style="color: #00c853; text-decoration: underline;">Влез тук</a>
+    </p>
+
+  </div>
 </div>
-<style>
-input, select {
-  /* ако нямаш Tailwind @apply, сложи класове ръчно */
-  width: 100%;
-  border: 1px solid #d1d5db;   /* gray-300 */
-  border-radius: 0.25rem;
-  padding: 0.5rem 0.75rem;
-}
-</style>
 {% endblock %}

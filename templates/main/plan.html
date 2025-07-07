@@ -1,41 +1,57 @@
-{% extends "base.html" %}
-{% load humanize %}{% load sum_attribute %}  {# нашият custom filter (т. 7.2) #}
+{% extends "base.html" %} 
+{% block title %}План за {{ meal_type.get_name_display }}{% endblock %}
 
 {% block content %}
-<h2 class="text-2xl font-semibold mb-4">
-    План за {{ meal_type.name|capfirst }}
-</h2>
+<div class="container" style="display: flex; justify-content: center; margin-top: 40px;">
+  <div class="glass-card" style="width: 100%; max-width: 850px;">
+    <h2 class="title" style="text-align: center;">План за {{ meal_type.get_name_display }}</h2>
 
-<table class="table-auto w-full border">
-  <thead class="bg-gray-100">
-    <tr>
-      <th class="p-2 text-left">Храна</th>
-      <th class="p-2 text-right">Грамове</th>
-      <th class="p-2 text-right">Ккал</th>
-    </tr>
-  </thead>
+    <form method="post" action="{% url 'main:accept_meal' %}">
+      {% csrf_token %}
 
-  <tbody>
-    {% for item in plan %}
-    <tr class="border-t">
-      <td class="p-2">{{ item.food.name }}</td>
-      <td class="p-2 text-right">{{ item.grams }}</td>
-      <td class="p-2 text-right">{{ item.kcal|intcomma }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
+      <table class="profile-table">
+        <thead>
+          <tr>
+            <th>Храна</th>
+            <th>Грамове</th>
+            <th>Ккал</th>
+            <th>Протеин (g)</th>
+            <th>Въгл. (g)</th>
+            <th>Мазнини (g)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in plan %}
+          <tr>
+            <td>{{ item.food.food_name }}</td>
+            <td>{{ item.grams }}</td>
+            <td>{{ item.kcal }}</td>
+            <td>{{ item.protein }}</td>
+            <td>{{ item.carbs }}</td>
+            <td>{{ item.fats }}</td>
 
-  <tfoot class="font-semibold border-t">
-    <tr>
-      <td class="p-2 text-right">Общо:</td>
-      <td class="p-2 text-right">{{ plan|sum_attribute:"grams" }}</td>
-      <td class="p-2 text-right">{{ plan|sum_attribute:"kcal"|intcomma }}</td>
-    </tr>
-  </tfoot>
-</table>
+            <!-- Скритите полета за POST -->
+            <input type="hidden" name="food_id" value="{{ item.food.id }}">
+            <input type="hidden" name="grams" value="{{ item.grams }}">
+            <input type="hidden" name="kcal" value="{{ item.kcal }}">
+            <input type="hidden" name="protein" value="{{ item.protein }}">
+            <input type="hidden" name="carbs" value="{{ item.carbs }}">
+            <input type="hidden" name="fats" value="{{ item.fats }}">
+          </tr>
+          {% endfor %}
+        </tbody>
+        
+      </table>
 
-<a href="{% url 'select_meal' %}"
-   class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded mt-4">
-   ← Назад
-</a>
+      <div class="btn-area" style="margin-top: 30px;">
+        <button type="submit" class="btn-glass">
+           Приемам това хранене
+        </button>
+        <a href="{% url 'main:select_meal' %}" class="btn-behind" style="background-color: rgba(255,0,0,0.15); color: #c62828;">
+          ← Назад
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
 {% endblock %}

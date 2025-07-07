@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Предсказване на калории и макроси{% endblock %}
+
+{% block content %}
+<div class="container" style="display: flex; justify-content: center; align-items: center; min-height: 60vh;">
+  <div class="glass-card" style="width: 100%; max-width: 600px;">
+    <h2 class="title" style="text-align: center;">Предсказване на калориен дефицит и макронутриенти</h2>
+
+    {% if error %}
+      <p style="color: red; text-align: center;">{{ error }}</p>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn full-width" style="width: 100%;">Предсказване</button>
+    </form>
+
+    {% if prediction %}
+      <div class="card" style="margin-top: 30px;">
+        <h3 style="margin-bottom: 15px;">Резултати:</h3>
+        <ul>
+          <li><strong>Калориен дефицит:</strong> {{ prediction.calories_deficit }} kcal</li>
+          <li><strong>Протеин:</strong> {{ prediction.macro_protein }} g</li>
+          <li><strong>Мазнини:</strong> {{ prediction.macro_fat }} g</li>
+          <li><strong>Въглехидрати:</strong> {{ prediction.macro_carbs }} g</li>
+        </ul>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

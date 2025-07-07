@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+
+{% block title %}Прогрес{% endblock %}
+
+{% block content %}
+<div class="chart-container">
+  <h2 class="section-title">Прогрес: Тегло & Калории</h2>
+  <div class="card">
+    <canvas id="progressChart" height="460"></canvas>
+  </div>
+</div>
+
+<div class="table-container">
+  <h3 class="section-subtitle">Детайли за всяка промяна</h3>
+  <table class="progress-table">
+    <thead>
+      <tr>
+        <th>Дата</th>
+        <th>Старо тегло</th>
+        <th>Ново тегло</th>
+        <th>Промяна (kg)</th>
+        <th>Калории</th>
+        <th>Дни до промяна</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in table_data %}
+      <tr>
+        <td>{{ row.date }}</td>
+        <td>{{ row.old_weight|default:"—" }}</td>
+        <td>{{ row.new_weight }}</td>
+        <td>
+          {% if row.delta is not None %}
+            {% if row.delta > 0 %}
+              <span class="delta-plus">+{{ row.delta }}</span>
+            {% elif row.delta < 0 %}
+              <span class="delta-minus">{{ row.delta }}</span>
+            {% else %}
+              <span class="delta-zero">0</span>
+            {% endif %}
+          {% else %}
+            <span class="delta-empty">—</span>
+          {% endif %}
+        </td>
+        <td>{{ row.calories }}</td>
+        <td>{{ row.days|default:"—" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{{ progress|json_script:"progress_data" }}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const raw = JSON.parse(document.getElementById("progress_data").textContent);
+  const labels = raw.map(r => r.date);
+  const weights = raw.map(r => r.weight);
+  const calories = raw.map(r => r.calories);
+
+  const ctx = document.getElementById('progressChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Тегло (kg)',
+          data: weights,
+          borderColor: '#22c55e',
+          backgroundColor: 'rgba(34, 197, 94, 0.15)',
+          tension: 0.4,
+          yAxisID: 'yWeight',
+          pointStyle: 'circle',
+          pointRadius: 4,
+          fill: true
+        },
+        {
+          label: 'Калории',
+          data: calories,
+          borderColor: '#ef4444',
+          backgroundColor: 'rgba(239, 68, 68, 0.15)',
+          tension: 0.4,
+          yAxisID: 'yCalories',
+          pointStyle: 'triangle',
+          pointRadius: 4,
+          fill: true
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'top', labels: { font: { size: 13, weight: 'bold' } } }
+      },
+      scales: {
+        x: { title: { display: true, text: 'Дата' } },
+        yWeight: {
+          type: 'linear', position: 'left',
+          title: { display: true, text: 'Тегло (kg)' },
+        },
+        yCalories: {
+          type: 'linear', position: 'right',
+          title: { display: true, text: 'Калории' },
+          grid: { drawOnChartArea: false },
+          ticks: {
+            beginAtZero: true,
+            color: '#b91c1c'
+          }
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}

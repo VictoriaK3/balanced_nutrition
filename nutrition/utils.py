@@ -1,28 +1,26 @@
 # функции – калкулации
 from .models import  DailyDeficit, Food
-from .models import ProgressHistory
 from datetime import datetime
 from django.utils import timezone
 from users.models import UserProfile
 
 def calculate_daily_deficit(profile, weight=None):
-    """Връща kcal, protein_g, carbs_g, fats_g."""
 
-    # 1. Тегло и ръст винаги като float
+    #  Тегло и ръст винаги като float
     w = float(weight) if weight is not None else float(profile.weight)
     h = float(profile.height)
 
-    # 2. BMR (Mifflin–St Jeor)
+    #  BMR (Mifflin–St Jeor)
     if profile.gender == 'male':
         bmr = 10 * w + 6.25 * h - 5 * profile.age + 5
     else:
         bmr = 10 * w + 6.25 * h - 5 * profile.age - 161
 
-    # 3. TDEE
-    factor = profile.activity_factor        # вече е float
+    # TDEE
+    factor = profile.activity_factor        
     maintenance = bmr * factor
 
-    # 4. Калориен баланс
+    # Калориен баланс
     if profile.goal == 'lose_weight':
         kcal = maintenance - 500
     elif profile.goal == 'gain_weight':
@@ -30,7 +28,7 @@ def calculate_daily_deficit(profile, weight=None):
     else:
         kcal = maintenance
 
-    # 5. Макроси
+    # Макроси
     protein = round(w * 2)
     fats    = round(kcal * 0.25 / 9)
     carbs   = round((kcal - (protein * 4 + fats * 9)) / 4)
@@ -39,81 +37,56 @@ def calculate_daily_deficit(profile, weight=None):
 
 
 def get_last_progress_or_dailydeficit(user_profile):
-    # Опитваме да вземем последния запис от ProgressHistory
-    last_progress = ProgressHistory.objects.filter(user_profile=user_profile).order_by('-date_recorded').first()
+    #  вземене последния запис от 
+    last_progress = DailyDeficit.objects.filter(user_profile=user_profile).order_by('-date_recorded').first()
     
     if last_progress:
         return last_progress
+    
     else:
-        # Ако няма запис в ProgressHistory - взимаме от DailyDeficit
-        daily_deficit = DailyDeficit.objects.filter(user_profile=user_profile).order_by('-id').first()
-        if daily_deficit:
-            # Превръщаме DailyDeficit в "прогрес"
-            return ProgressHistory(
-                user_profile=user_profile,
-                date_recorded=daily_deficit.date_recorded if hasattr(daily_deficit, 'date_recorded') else datetime.now(),
-                weight=user_profile.weight,
-                calories=daily_deficit.calories,
-                protein=daily_deficit.protein,
-                carbs=daily_deficit.carbs,
-                fats=daily_deficit.fats
-            )
-        else:
-            return None  # Ако няма и DailyDeficit (рядко се случва)
+         return None  
 
 def update_user_weight(user_profile, new_weight):
-    """
-    Актуализира теглото на потребителя, изчислява калориите, макронутриентите,
-    като адаптира приема спрямо метаболизма (промяна в теглото във времето).
-    Записва в ProgressHistory новия запис.
-    """
-     # Вземаме последния запис в прогрес историята, ако има
-    last_progress = ProgressHistory.objects.filter(user_profile=user_profile).order_by('-date_recorded').first()
 
-    # Ако няма предишен запис - първи запис (взимаме стойности от DailyDeficit)
+    today = timezone.localdate()
+     
+    last_progress = DailyDeficit.objects.filter(user_profile=user_profile).order_by('-date_recorded').first()
+
+    # Ако няма предишен запис - първи запис 
     if not last_progress:
         calories, protein, carbs, fats = calculate_daily_deficit(user_profile, new_weight)
     else:
-        # Изчисляваме колко дни са минали от последния запис
-        days_passed = (datetime.now() - last_progress.date_recorded).days
+        days_passed = (datetime.now().date() - last_progress.date_recorded).days or 1
         if days_passed == 0:
-            days_passed = 1  # За да избегнем деление на 0
+            days_passed = 1  
 
         # Промяна в теглото от последния запис
-        weight_diff = new_weight - last_progress.weight
-
-        # Адаптация на калориите спрямо промяната в теглото и времето (метаболизъм)
-        # 1 кг мазнини ~ 7700 калории. Ако е загубено 1 кг за 7 дни, дневен дефицит е 1100 калории.
-        # Ние изчисляваме дневната калорийна разлика, като корекция към последните калории
-
+        weight_diff = new_weight - last_progress.weigh
         calories_change_per_day = (weight_diff * 7700) / days_passed
+        adjusted_calories = max(last_progress.calories + calories_change_per_day, 1200)
 
-        # Новите калории се коригират спрямо предишните калории + калориите за промяната на теглото
-        adjusted_calories = last_progress.calories + calories_change_per_day
-
-        # За по-голяма персонализация, може да добавиш ограничение (напр. не по-малко от базов минимум)
-        min_calories = 1200  # примерно минимални калории, да не пада под това
+        min_calories = 1200  #минимални калории, да не пада под това
         if adjusted_calories < min_calories:
             adjusted_calories = min_calories
 
-        # Пресмятаме новите макроси по адаптираните калории и новото тегло
         protein = new_weight * 2
         fats = adjusted_calories * 0.25 / 9
         carbs = (adjusted_calories - (protein * 4 + fats * 9)) / 4
 
+        protein = round(new_weight * 2, 1)
+        fats = round(adjusted_calories * 0.25 / 9, 1)
+        carbs = round((adjusted_calories - (protein * 4 + fats * 9)) / 4, 1)
         calories = int(adjusted_calories)
-        protein = round(protein, 1)
-        fats = round(fats, 1)
-        carbs = round(carbs, 1)
 
-    # Записваме новата история
-    ProgressHistory.objects.create(
+    DailyDeficit.objects.update_or_create(
         user_profile=user_profile,
-        weight=new_weight,
-        calories=calories,
-        protein=protein,
-        carbs=carbs,
-        fats=fats
+        date_recorded=today,
+        defaults={
+            'total_calories': calories,
+            'protein_deficit': protein,
+            'carbs_deficit': carbs,
+            'fats_deficit': fats
+        }
     )
 
     # Актуализираме профила
@@ -122,83 +95,70 @@ def update_user_weight(user_profile, new_weight):
 
     return calories, protein, carbs, fats
 
-""" функции за изчисление на грамове за едно ядене
-"""
-#разпределяне на макронутриентите по хранения
 MEAL_SHARE = {
-    "breakfast": 0.20,  # 20 %
-    "lunch":     0.35,  # 35 %
-    "snack":     0.15,  # 15 %
-    "dinner":    0.30,  # 30 %
+    "breakfast": 0.20,  
+    "lunch":     0.35,  
+    "snack":     0.15,  
+    "dinner":    0.30,  
 }
 #Функция за изчисление на количествата за избрани храни
-def calculate_meal_quantities(user, meal_code, food_ids):
-    """
-    • user        – request.user
-    • meal_code   – 'breakfast' | 'lunch' | 'snack' | 'dinner'
-    • food_ids    – list/iterable от избраните Food PK-та
+def calculate_meal_quantities(profile: UserProfile, meal_code: str, food_ids: list):
+    deficit = get_current_deficit(profile.user)
+    if not deficit:
+        raise ValueError("Липсват данни за дневен дефицит.")
 
-    Връща list от dict-ове:
-        [{'food': Food, 'grams': 123, 'kcal': 321}, …]
-    """
-    # 2.2  Взимаме последния DailyDeficit → дневни kcal & макроси
-    daily = (user.daily_deficits
-                  .filter(date__lte=timezone.now().date())
-                  .first())        # последният (благодарение на Meta.ordering)
+    C_daily = deficit.calorie_deficit
+    P_daily = deficit.protein_deficit
+    Cb_daily = deficit.carbs_deficit
+    F_daily = deficit.fats_grams
 
-    if not daily:
-        # Ако профилът е нов и още няма дефицит – по-добре гръмни,
-        # за да се сетим да създадем/обновим профила
-        raise ValueError("No DailyDeficit found – създай/обнови профила първо!")
+    if not C_daily:
+        raise ValueError("Моля, обнови профила – няма дневен дефицит.")
 
-    # 2.3  Колко kcal трябва да покрием с това хранене
-    target_cal = daily.calorie_deficit * MEAL_SHARE[meal_code]
+    #  таргети за това хранене
+    portion = MEAL_SHARE.get(meal_code, 0.25)
+    C_meal   = C_daily * portion
+    P_meal   = P_daily * portion
+    Cb_meal  = Cb_daily * portion
+    F_meal   = F_daily * portion
 
-    # 2.4  Зареждаме обектите Food
-    foods = list(Food.objects.filter(id__in=food_ids))
+    # данни за храните
+    foods = Food.objects.filter(id__in=food_ids)
+    scored = []
+    for f in foods:
+        dk = f.energy_kcal / 100.0
+        dp = f.protein_g   / 100.0
+        dc = f.carbs_g     / 100.0
+        df = f.fat_g       / 100.0
+     
+        score = dp*P_meal + dc*Cb_meal + df*F_meal
+        scored.append((f, dk, dp, dc, df, score))
 
-    # 2.5  Изчисляваме „kcal за 1 g“ за всяка храна
-    kcal_per_g = [f.calories / 100 for f in foods]   # защото calories са „на 100 g“
+    total_score = sum(s for *_, s in scored) or 1.0
 
-    # 2.6  Сборът на всички калории-на-грам → ще ни трябва за пропорцията
-    total_kcal_per_g = sum(kcal_per_g)
-
+    
     plan = []
-    for food, kpg in zip(foods, kcal_per_g):
-        share = kpg / total_kcal_per_g          # колко % от общите kcal „носи“ тази храна
-        grams = round(target_cal * share / kpg) # => грамовете ѝ
+    for f, dk, dp, dc, df, score in scored:
+        share = score / total_score
+        grams = round((C_meal * share) / dk, 1)
+        kcal    = round(grams * dk, 1)
+        protein = round(grams * dp, 1)
+        carbs   = round(grams * dc, 1)
+        fats    = round(grams * df, 1)
         plan.append({
-            "food":  food,
-            "grams": grams,
-            "kcal":  grams * kpg,               # реалните kcal (≈ share * target_cal)
+            "food":    f,
+            "grams":   grams,
+            "kcal":    kcal,
+            "protein": protein,
+            "carbs":   carbs,
+            "fats":    fats,
         })
 
     return plan
 
-#calc_daily_targets, която приема числови стойности (вместо user_profile) и вътре конструираме „временен профил“ _TempProfile, 
-# за да може да извикаме съществуващата calculate_daily_deficit.
-def calc_daily_targets(weight, height, age, gender, activity_level, goal):
-    """
-    Използва calculate_daily_deficit, за да върне dict:
-      {
-        "kcal": int,
-        "protein_g": float,
-        "carbs_g": float,
-        "fats_g": float
-      }
-    """
-    # Викаме вече съществуващата функция; тя връща (calories, protein, carbs, fats)
-    calories, protein, carbs, fats = calculate_daily_deficit(
-        user_profile=None,         # подменяме със сурови аргументи, затова подаваме None
-        weight=weight,
-        # height, age, gender, activity_level, goal се предават индивидуално
-        # но calculate_daily_deficit приема само user_profile + weight, така че
-        # ще извикаме calculate_daily_deficit по-този начин:
-        # ➔ временно създаваме „mock профил“?
-    )
 
-    # За да използваме calculate_daily_deficit, тя иска обект user_profile.
-    # Ще реализираме лека обвивка: ще направим вътре временен UserProfile-like обект.
+def calc_daily_targets(weight, height, age, gender, activity_level, goal):
+   
 
     class _TempProfile:
         def __init__(self, w, h, a, gend, act, gl):
@@ -218,3 +178,81 @@ def calc_daily_targets(weight, height, age, gender, activity_level, goal):
         "carbs_g": float(round(cb, 1)),
         "fats_g": float(round(ft, 1)),
     }
+
+
+import requests
+
+def get_current_temperature(lat: float, lon: float) -> float | None:
+    
+    url = "https://api.open-meteo.com/v1/forecast"
+    params = {
+        "latitude": lat,
+        "longitude": lon,
+        "current_weather": True,
+        "timezone": "auto"
+    }
+    try:
+        r = requests.get(url, params=params, timeout=3)
+        r.raise_for_status()
+        data = r.json()
+        return data["current_weather"]["temperature"]
+    except (requests.RequestException, KeyError):
+        return None
+
+import requests
+
+def get_temperature(city):
+        try:
+            geo = requests.get(
+                'https://geocoding-api.open-meteo.com/v1/search',
+                params={'name': city, 'count': 1},
+                timeout=3
+            ).json()
+            results = geo.get('results') or []
+            if not results:
+                return None
+            lat = results[0]['latitude']
+            lon = results[0]['longitude']
+
+            weather = requests.get(
+                'https://api.open-meteo.com/v1/forecast',
+                params={
+                    'latitude': lat,
+                    'longitude': lon,
+                    'daily': 'temperature_2m_max',
+                    'timezone': 'auto'
+                },
+                timeout=3
+            ).json()
+            return weather["daily"]["temperature_2m_max"][0]
+        except Exception:
+            return None
+        
+def calculate_daily_water(weight, age, activity_level, city):
+    temp_c = get_temperature(city)
+    print(f"[DEBUG] Temp in {city} = {temp_c}")
+
+    #базово изчисление (30 ml / kg)
+    base_ml = float(weight) * 30
+
+    if age >= 55:
+        base_ml += 200
+
+    
+    activity_levels = {
+        'low': 0.00,
+        'moderate': 0.10,
+        'high': 0.20,
+    }
+    activity_coeff = activity_levels.get(activity_level, 0)
+
+    climate_coeff = 0.15 if temp_c and temp_c > 25 else 0.0
+
+    total_ml = float(base_ml) * (1 + activity_coeff + climate_coeff)
+
+    return round(total_ml / 1000, 2)
+
+from .models import DailyDeficit
+
+def get_current_deficit(user):
+    return DailyDeficit.objects.filter(user=user).order_by('-date').first()

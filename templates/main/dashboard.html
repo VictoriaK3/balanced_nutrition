@@ -1,35 +1,62 @@
 {% extends "base.html" %}
-{% load humanize %}
-{% block title %}Табло – Balanced Nutrition{% endblock %}
+{% block title %}Табло – NutriPal{% endblock %}
 
 {% block content %}
-<h2 class="text-2xl font-bold mb-6">Дневни таргети</h2>
+<div class="container">
 
-<div class="grid grid-cols-2 gap-4">
-  {% for c in cards %}
-    <div class="bg-white rounded shadow p-6 text-center">
-      <p class="text-gray-500">{{ c.label }}</p>
-      <p class="text-3xl font-semibold">
-        {{ c.val|intcomma }} <span class="text-lg">{{ c.unit }}</span>
-      </p>
+  <!-- Начален дефицит -->
+  <div class="glass-card">
+    <h2 class="title">Начален дефицит</h2>
+    <div class="card-row">
+      {% for c in initial_cards %}
+        <div class="card text-center" style="padding: 15px;">
+          <p class="label">{{ c.label }}</p>
+          <p class="value">{{ c.val|floatformat:0 }} {{ c.unit }}</p>
+        </div>
+      {% endfor %}
     </div>
-  {% endfor %}
+  </div>
+
+  <!-- Консумирани днес -->
+  <div class="glass-card">
+    <h2 class="title">Консумирани днес</h2>
+    <div class="card-row">
+      {% for c in consumed_cards %}
+        <div class="card text-center" style="padding: 15px;">
+          <p class="label">{{ c.label }}</p>
+          <p class="value">{{ c.val|floatformat:0 }} {{ c.unit }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Оставащи таргети -->
+  <div class="glass-card">
+    <h2 class="title">Оставащи таргети</h2>
+    <div class="card-row">
+      {% for c in remaining_cards %}
+        <div class="card text-center" style="padding: 15px;">
+          <p class="label">{{ c.label }}</p>
+          <p class="value">{{ c.val|floatformat:0 }} {{ c.unit }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!--  Вода -->
+  <div class="glass-card">
+    <h2 class="title">Хидратация</h2>
+    <div class="card-row">
+      <div class="card text-center" style="padding: 15px;">
+        <p class="label">Препоръчителна вода</p>
+        <p class="value">{{ water_goal|floatformat:0 }} ml</p>
+      </div>
+      <div class="card text-center" style="padding: 15px;">
+        <p class="label">Изпита вода</p>
+        <p class="value">{{ water_log.amount_ml|default:0 }} ml</p>
+      </div>
+    </div>
+  </div>
+
 </div>
-
-<canvas id="macroChart" class="mt-10 mx-auto"></canvas>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-/* предаваме го като string и парсваме */
-const data = JSON.parse('{{ macro_json|escapejs }}');
-
-new Chart(document.getElementById('macroChart'), {
-  type: 'pie',
-  data: {
-    labels: ['Протеин', 'Мазнини', 'Въглехидрати'],
-    datasets: [{ data: data }]
-  },
-  options: { plugins: { legend: { position:'bottom' } } }
-});
-</script>
 {% endblock %}

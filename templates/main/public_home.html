@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/public_home.css' %}">
+{% block title %}Добре дошли в NutriPal{% endblock %}
+
+{% block content %}
+<section class="hero-section" style="padding: 60px 20px; text-align: center; background: linear-gradient(135deg, #d9f4ec, #dceffd);">
+  <h1 style="font-size: 3.5rem; font-weight: 800; color: #1b5e20; margin-bottom: 20px;">Balanced Nutrition</h1>
+  <p style="font-size: 1.25rem; color: #333; max-width: 700px; margin: 0 auto 20px;">
+    „Ние сме това, което ядем“ – започнете своето здравословно пътешествие с нас още днес.
+  </p>
+  <p style="font-size: 1rem; color: #444; max-width: 700px; margin: 0 auto 40px;">
+    Създайте профил, въведете вашата цел и следете прогреса си по интуитивен и красив начин.
+  </p>
+  <div style="margin-bottom: 60px;">
+  <a href="{% url 'users:login' %}" class="btn-primary">Вход</a>
+  <a href="{% url 'users:register' %}" class="btn-secondary">Регистрация</a>
+</div>
+
+</section>
+
+<section style="background-color: #f4fdfb; padding: 60px 20px;">
+  <div class="container" style="max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+    <div class="glass-card">
+      
+      <h3 class="title" style="margin-bottom: 10px;">📊 Проследяване на калории</h3>
+      <p>Добавяйте храни и следете енергийния си баланс лесно и бързо.</p>
+    </div>
+    <div class="glass-card">
+      
+      <h3 class="title" style="margin-bottom: 10px;">🍽️ Макроси по мярка</h3>
+      <p>Автоматично изчисляване на въглехидрати, мазнини и протеини.</p>
+    </div>
+    <div class="glass-card">
+      
+      <h3 class="title" style="margin-bottom: 10px;">🧾 Индивидуален план</h3>
+      <p>Хранене, базирано на вашите цели, вкусове и ритъм.</p>
+    </div>
+  </div>
+</section>
+
+<section style="padding: 50px 20px; text-align: center; background: #ffffff;">
+  <h2 style="font-size: 2rem; margin-bottom: 20px;">💬 Цитат на деня</h2>
+  <blockquote style="font-style: italic; color: #555; max-width: 700px; margin: 0 auto;">
+    „Храната, която ядеш, може да бъде най-сигурното и най-мощното лекарство – или най-бавната отрова.“<br>
+    <span style="font-size: 0.9rem; color: #888;">– Анонимен</span>
+  </blockquote>
+</section>
+{% endblock %}

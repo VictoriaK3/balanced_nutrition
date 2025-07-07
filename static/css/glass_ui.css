@@ -1,0 +1,337 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #e6f0ec, #d5e8f5);
+  background-attachment: fixed;
+  margin: 0;
+  padding: 0;
+  color: #1e1e1e;
+}
+.container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+/* CARDS */
+.card, .glass-card {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 20px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  padding: 25px;
+  backdrop-filter: blur(10px);
+  margin-bottom: 30px;
+  color: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.card-row {
+   display: flex;
+  justify-content: space-around;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.title {
+   font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.label {
+  font-size: 14px;
+  color: #555;
+}
+
+.value {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.green { color: #00c853; }
+.orange { color: #ef6c00; }
+.blue { color: #2962ff; }
+
+/* BUTTONS */
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.button-grid .btn {
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  color: #fff;
+  transition: 0.3s;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn-glass {
+  width: 100%;
+  padding: 12px 20px;
+  background: rgba(0, 200, 83, 0.2);
+  color: #006400;
+  font-weight: 600;
+  font-size: 1rem;
+  border: 1px solid rgba(0, 200, 83, 0.4);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  text-align: center;
+}
+
+.btn-glass:hover {
+  background: rgba(0, 200, 83, 0.4);
+  color: #004d40;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+}
+
+
+/* Цветове по ред */
+.button-grid .btn:nth-child(1) {
+  background: linear-gradient(135deg, #00c853, #b9f6ca);
+}
+.button-grid .btn:nth-child(2) {
+  background: linear-gradient(135deg, #ff6d00, #ffd180);
+}
+.button-grid .btn:nth-child(3) {
+  background: linear-gradient(135deg, #2962ff, #82b1ff);
+}
+.button-grid .btn:nth-child(4) {
+  background: linear-gradient(135deg, #d500f9, #ea80fc);
+}
+
+
+
+.btn:hover {
+  background: rgba(255, 255, 255, 0.8);
+  color: #00c853;
+  transform: translateY(-2px);
+}
+
+/* Plan.html */
+.profile-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+.profile-table th,
+.profile-table td {
+  padding: 12px 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+.profile-box {
+  padding: 30px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 20px;
+}
+.btn-area {
+  text-align: right;
+}
+
+.btn-behind {
+  padding: 10px 20px;
+  margin-left: 15px;
+  background: rgba(255, 0, 0, 0.1);
+  color: #b71c1c;
+  font-weight: 600;
+  font-size: 1rem;
+  border: 1px solid rgba(183, 28, 28, 0.3);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-behind:hover {
+  background: rgba(183, 28, 28, 0.2);
+  color: #7f0000;
+  transform: translateY(-2px);
+}
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+.radio-group {
+ display: flex;
+  flex-direction: column;
+  gap: 15px; /* Spacing between radio options */
+  margin: 20px 0;
+}
+
+.radio-option {
+  display: flex; /* Use flexbox for alignment */
+  align-items: flex-start; /* Align items to the start (top) */
+  gap: 12px; /* Space between radio button and text */
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.4);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  width: 100%; /* Take full width of its parent */
+  box-sizing: border-box; /* Include padding in the width */
+}
+
+.radio-option:hover {
+ background: rgba(255, 255, 255, 0.6);
+}
+
+.radio-option input[type="radio"] {
+  margin: 0; /* Remove default margin */
+  flex-shrink: 0; /* Prevent radio button from shrinking */
+  transform: scale(1.2); /* Make it slightly larger */
+  accent-color: #00c853; /* Green accent color */
+   width: auto; /* Уверете се, че не е фиксирана ширина, освен ако не е умишлено */
+    height: auto;
+    display: block; /* Може да помогне при някои браузъри за инпут елементи */
+    align-self: center;
+}
+
+.radio-option span {
+  font-size: 1rem;
+  color: #1e1e1e;
+  line-height: 1.3;
+  text-align: left; /* Ensure text is left-aligned */
+  flex-grow: 1; /* Allow text to take up remaining space */
+  word-break: break-word;
+  flex-basis: auto; /* Позволява на елемента да се свива/разширява според съдържанието */
+    min-width: 0;
+}
+
+.custom-input-label {
+    display: flex;
+    align-items: center; /* Центрира елементите вертикално */
+    gap: 12px; /* Разстояние между input и текста */
+    padding: 12px 16px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.4);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
+    white-space: normal; /* Позволява на текста да се пренася нормално */
+}
+
+.custom-input-label:hover {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.custom-input-label input[type="radio"],
+.custom-input-label input[type="checkbox"] { /* Прилага се за двата типа input */
+    margin: 0;
+    flex-shrink: 0;
+    transform: scale(1.2);
+    accent-color: #00c853;
+    width: auto; /* Позволява на инпута да вземе своята естествена ширина */
+    height: auto;
+    display: block; /* Може да помогне за консистентност */
+    align-self: center; /* Центрира визуално input-а спрямо текста */
+}
+
+.custom-input-label span {
+    font-size: 1rem;
+    color: #1e1e1e;
+    line-height: 1.3;
+    text-align: left;
+    flex-grow: 1; /* Позволява на текста да заеме цялото останало пространство */
+    overflow-wrap: break-word; /* Пренася дълги думи */
+    white-space: normal; /* Гарантира нормално пренасяне на редове */
+    min-width: 0; /* Позволява на елемента да се свива */
+}
+
+/* --- СПЕЦИФИЧНИ СТИЛОВЕ ЗА СПИСЪКА С ХРАНИ --- */
+.food-list-container {
+    list-style: none;
+    padding: 15px;
+    max-height: 250px;
+    overflow-y: auto;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.3);
+    margin-bottom: 20px;
+}
+.food-list-item {
+    margin-bottom: 10px;
+}
+
+
+.floating-foods-chaotic {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+
+.food-tag {
+  position: absolute;
+  padding: 10px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-weight: 500;
+  color: #006400;
+  animation: fadeIn 0.4s ease-in;
+  pointer-events: auto;
+}
+
+.food-tag .remove-btn {
+  margin-left: 10px;
+  background: transparent;
+  border: none;
+  color: #d50000;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+
+
+   
+/* FOOTER */
+.footer {
+  text-align: center;
+  padding: 1rem;
+  margin-top: 2rem;
+  color: #777;
+  font-size: 0.9rem;
+}
+
+
+@media (max-width: 480px) {
+  .radio-option {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

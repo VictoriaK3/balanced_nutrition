@@ -1,9 +1,117 @@
-<!-- templates/main/select_foods.html -->
 {% extends "base.html" %}
+{% block title %}Стъпка 2: Изберете храни{% endblock %}
+
 {% block content %}
-  <h2>2. Избери храни за {{ meal_type.name }}</h2>
-  <form method="post">{% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Изчисли план</button>
-  </form>
+<div class="container" style="max-width: 600px; margin: 40px auto;">
+
+  <div class="glass-card">
+    <h1 class="title" style="text-align: center;">Стъпка 2: Изберете храни</h1>
+
+    <input type="text"
+           id="food-search"
+           placeholder="Търсете храна…"
+           class="search-input"/>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <ul id="food-list" class="food-list-container">
+        {% for food in form.fields.foods.queryset %}
+          <li data-name="{{ food.food_name|lower }}" class="food-list-item">
+            <label class="custom-input-label">
+              <input type="checkbox"
+                     name="foods"
+                     value="{{ food.id }}"
+                     {% if food.id|stringformat:"s" in form.data.foods %}checked{% endif %}>
+              <span>{{ food.food_name }}</span>
+            </label>
+          </li>
+        {% endfor %}
+      </ul>
+
+      <button type="submit" class="btn-glass">
+        Изчисли план
+      </button>
+    </form>
+
+    <hr class="my-6">
+
+    <h3 class="text-xl font-semibold mb-2">Няма я твоята храна?</h3>
+    <p class="mb-2">Добави нова храна с данни на 100 грама:</p>
+
+    <form method="post">
+      {% csrf_token %}
+      {{ food_form.as_p }}
+      <button type="submit" name="add_food" class="btn-glass">+ Добави нова храна</button>
+    </form>
+  </div>
+
+  <div id="floating-selected-foods" class="floating-foods-container">
+  </div>
+
+</div>
+
+<script>
+  document.getElementById('food-search').addEventListener('input', function(e) {
+    const term = e.target.value.toLowerCase();
+    document.querySelectorAll('#food-list li').forEach(li => {
+      li.style.display = li.dataset.name.includes(term) ? '' : 'none';
+    });
+  });
+
+  const checkboxes = document.querySelectorAll('#food-list input[type="checkbox"]');
+  const floatingContainer = document.getElementById('floating-selected-foods');
+
+  function getRandomPositionOutsideForm() {
+    const formBox = document.querySelector('.glass-card').getBoundingClientRect();
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    const padding = 50;
+    const tagWidth = 160;
+    const tagHeight = 40;
+
+    let x, y;
+    const leftZone = Math.random() < 0.5;
+
+    if (leftZone) {
+      x = Math.floor(Math.random() * (formBox.left - tagWidth - padding));
+    } else {
+      x = Math.floor(Math.random() * (windowWidth - (formBox.right + tagWidth + padding)) + formBox.right + padding);
+    }
+
+    y = Math.floor(Math.random() * (windowHeight - tagHeight - padding)) + padding;
+
+    return { x, y };
+  }
+
+  function renderSelectedFoods() {
+    floatingContainer.innerHTML = '';
+    checkboxes.forEach(cb => {
+      if (cb.checked) {
+        const foodName = cb.closest('label').querySelector('span').innerText;
+        const tag = document.createElement('div');
+        tag.classList.add('food-tag');
+        tag.innerHTML = `${foodName} <button class="remove-btn">&times;</button>`;
+
+        const { x, y } = getRandomPositionOutsideForm();
+        tag.style.left = `${x}px`;
+        tag.style.top = `${y}px`;
+
+        tag.querySelector('.remove-btn').addEventListener('click', () => {
+          cb.checked = false;
+          renderSelectedFoods();
+        });
+
+        floatingContainer.appendChild(tag);
+      }
+    });
+  }
+
+  checkboxes.forEach(cb => {
+    cb.addEventListener('change', renderSelectedFoods);
+  });
+
+  renderSelectedFoods();
+</script>
 {% endblock %}

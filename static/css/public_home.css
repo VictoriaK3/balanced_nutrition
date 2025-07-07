@@ -1,0 +1,32 @@
+.btn-primary,
+.btn-secondary {
+  display: inline-block;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.btn-primary {
+  background-color: #2962ff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0039cb;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background-color: #00c853;
+  color: white;
+  margin-left: 10px;
+}
+
+.btn-secondary:hover {
+  background-color: #009624;
+  transform: translateY(-2px);
+}
