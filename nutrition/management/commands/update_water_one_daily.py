@@ -26,11 +26,24 @@ class Command(BaseCommand):
                 activity_level=profile.activity_level,
                 city=city
             )
+            # Опитваме да вземем последния запис, за да копираме макроси
+            last_deficit = DailyDeficit.objects.filter(user=profile.user).order_by('-date').first()
+
+            if not last_deficit:
+                print(f"[❌] Пропуснат потребител {profile.user.username} – няма записан дефицит.")
+                continue
 
             deficit, created = DailyDeficit.objects.get_or_create(
                 user=profile.user,
                 date=today,
-                defaults={"daily_water_goal": new_water, "city": city}
+                defaults={
+                    "city": profile.city,
+                    "daily_water_goal": new_water,
+                    "calorie_deficit": last_deficit.calorie_deficit or 0,
+                    "protein_deficit": last_deficit.protein_deficit or 0,
+                    "carbs_deficit": last_deficit.carbs_deficit or 0,
+                    "fats_grams": last_deficit.fats_grams or 0,
+                }
             )
 
             if created:
